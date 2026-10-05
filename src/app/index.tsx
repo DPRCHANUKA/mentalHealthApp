@@ -1,98 +1,150 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Colors } from '@/constants/theme';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+export default function StartScreen() {
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Image
+          source={require('../../assets/images/mental-health-logo.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+        <Text style={styles.title}>Luma</Text>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+        <Text style={styles.description}>
+          your space to check in and get support
+        </Text>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+        <View style={styles.privacyCard}>
+          <Text style={styles.privacyIcon}>🔒</Text>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+          <View style={styles.privacyContent}>
+            <Text style={styles.privacyTitle}>
+              Private & Confidential
+            </Text>
+
+            <Text style={styles.privacyText}>
+              Your information is handled with care.
+            </Text>
+          </View>
+        </View>
+
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>Get Started</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.privacyLink}>
+          <Text style={styles.privacyLinkText}>
+            Learn more about our privacy
+          </Text>
+
+          <Text style={styles.arrow}>→</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    backgroundColor: Colors.light.background,
   },
-  safeArea: {
+
+  content: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    paddingHorizontal: 24,
   },
+
+  logo: {
+    width: 200,
+    height: 200,
+    marginBottom: 20,
+  },
+
   title: {
+    fontSize: 36,
+    fontFamily:'IrishGrover',
+    color: Colors.light.primary,
     textAlign: 'center',
   },
-  code: {
-    textTransform: 'uppercase',
+
+  description: {
+    marginTop: 10,
+    fontSize: 16,
+    color: Colors.light.textSecondary,
+    textAlign: 'center',
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+
+  privacyCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 330,
+    marginTop: 32,
+    padding: 16,
+    backgroundColor: Colors.light.surface,
+    borderRadius: 16,
+  },
+
+  privacyIcon: {
+    fontSize: 22,
+    marginRight: 12,
+  },
+
+  privacyContent: {
+    flex: 1,
+  },
+
+  privacyTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.light.primary,
+  },
+
+  privacyText: {
+    marginTop: 4,
+    fontSize: 13,
+    color: Colors.light.textSecondary,
+  },
+
+  button: {
+    marginTop: 20,
+    width: '100%',
+    maxWidth: 330,
+    height: 52,
+    borderRadius: 12,
+    backgroundColor: Colors.light.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.light.surface,
+  },
+
+  privacyLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+    paddingVertical: 8,
+  },
+
+  privacyLinkText: {
+    fontSize: 13,
+    color: Colors.light.textSecondary,
+  },
+
+  arrow: {
+    marginLeft: 6,
+    fontSize: 16,
+    color: Colors.light.accent,
   },
 });
