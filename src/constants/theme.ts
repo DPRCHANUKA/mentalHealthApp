@@ -8,8 +8,8 @@ export const Colors = {
     accent: '#4FA7A0',
     secondary: '#8F88C9',
 
-    background: '#F7F8F6',
-    surface: '#FFFFFF',
+    background: '#EAF2F3',
+    surface: '#E8E5F4',
 
     text: '#263238',
     textSecondary: '#66727A',
@@ -27,7 +27,7 @@ export const Colors = {
     accent: '#4FA7A0',
     secondary: '#8F88C9',
 
-    background: '#F7F8F6',
+    background: '#EAF2F3',
     surface: '#FFFFFF',
 
     text: '#263238',
