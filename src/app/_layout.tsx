@@ -26,6 +26,9 @@ export default function TabLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="role-selection" />
+        <Stack.Screen name="student/privacy" />
+        <Stack.Screen name="student/student-home" /> 
+        <Stack.Screen name="mentor/mentor-home" />
       </Stack>
     </ThemeProvider>
   );

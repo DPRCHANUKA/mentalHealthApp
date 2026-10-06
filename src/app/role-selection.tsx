@@ -28,8 +28,11 @@ export default function RoleSelectionScreen() {
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
   const handleNext = () => {
-    if (!selectedRole) return;
-    router.push({ pathname: '/privacy', params: { role: selectedRole } });
+    if (selectedRole === 'student') {
+      router.push('/student/privacy');
+    } else if (selectedRole === 'mentor') {
+      router.replace('/mentor/mentor-home');
+    }
   };
 
   return (
