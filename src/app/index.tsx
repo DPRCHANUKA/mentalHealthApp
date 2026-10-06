@@ -1,7 +1,10 @@
 import { Colors } from '@/constants/theme';
+import { useRouter } from 'expo-router';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function StartScreen() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -31,7 +34,7 @@ export default function StartScreen() {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={() => router.push('/role-selection')}>
           <Text style={styles.buttonText}>Get Started</Text>
         </TouchableOpacity>
 
