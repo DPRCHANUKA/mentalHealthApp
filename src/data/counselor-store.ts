@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSyncExternalStore } from 'react';
 
@@ -33,6 +34,7 @@ const persist = async () => {
 
 // Load saved counselors once when the app starts
 const ready = (async () => {
+  if (Platform.OS === 'web' && typeof window === 'undefined') return;
   try {
     const raw = await AsyncStorage.getItem(STORAGE_KEY);
     if (raw) {
@@ -73,7 +75,9 @@ const subscribe = (listener: () => void) => {
 };
 
 const getSnapshot = () => counselors;
+const serverSnapshot: Counselor[] = [];
+const getServerSnapshot = () => serverSnapshot;
 
 export function useCounselors(): Counselor[] {
-  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
