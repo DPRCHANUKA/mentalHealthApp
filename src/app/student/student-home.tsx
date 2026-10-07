@@ -10,7 +10,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const QUICK_ACCESS = [
   { id: 'self-help', route: '/student/self-help', icon: '📖', label: 'Self-help', colors: ['#FCEEEE', '#F3D6D6'], edge: '#E2BCBC' },
   { id: 'breathing', route: '/student/breathing', icon: '🧘', label: 'Breathing', colors: ['#F0EDFA', '#DCD7F1'], edge: '#C3BDE2' },
-  { id: 'counselling', route: '/student/counselling', icon: '🧑‍⚕️', label: 'Counselling', colors: ['#F0EDFA', '#DCD7F1'], edge: '#C3BDE2' },
+  // Counselling now opens the counselor list page
+  { id: 'counselling', route: '/student/counselor-page', icon: '🧑‍⚕️', label: 'Counselling', colors: ['#F0EDFA', '#DCD7F1'], edge: '#C3BDE2' },
   { id: 'mood-history', route: '/student/mood-history', icon: '🕒', label: 'Mood History', colors: ['#FCEEEE', '#F3D6D6'], edge: '#E2BCBC' },
 ] as const;
 
