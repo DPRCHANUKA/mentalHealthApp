@@ -3,16 +3,16 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -293,7 +293,7 @@ export default function AddCounselorScreen() {
                     }
                     placeholder="0"
                     placeholderTextColor="#9CA3AF"
-                    keyboardType="decimal-pad"
+                    keyboardType="decimal-pad" 
                   />
                 </View>
               </View>
