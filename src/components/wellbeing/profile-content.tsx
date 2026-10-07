@@ -1,6 +1,7 @@
-import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter, type Href } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Button, Dialog, palette, ui } from './screen';
 
@@ -8,6 +9,7 @@ type Profile = { name: string; id: string; sex: string };
 export function ProfileContent({ profile, role, onSave, onLogout }: {
   profile: Profile; role: 'Student' | 'Mentor'; onSave: (profile: Profile) => void; onLogout: () => void;
 }) {
+  const router = useRouter();
   const [draft, setDraft] = useState(profile);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState('');
@@ -20,6 +22,19 @@ export function ProfileContent({ profile, role, onSave, onLogout }: {
     { key: 'sex', label: 'Sex', icon: 'information-circle-outline', placeholder: 'Optional — leave blank if preferred' },
   ] as const;
   return <>
+    {/* Admin login button */}
+    <View style={styles.adminRow}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Admin Login"
+        onPress={() => router.push('/admin/login' as Href)}
+        style={({ pressed }) => [styles.adminButton, pressed && { opacity: 0.85 }]}
+      >
+        <Ionicons name="shield-checkmark-outline" size={18} color="#FFFFFF" />
+        <Text style={styles.adminButtonText}>Admin Login</Text>
+      </Pressable>
+    </View>
+
     <View style={styles.hero}>
       <LinearGradient colors={['#243447', '#397974']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.banner}>
         <Text style={styles.eyebrow}>YOUR WELLBEING SPACE</Text>
@@ -81,6 +96,9 @@ export function ProfileContent({ profile, role, onSave, onLogout }: {
   </>;
 }
 const styles = StyleSheet.create({
+  adminRow: { alignItems: 'flex-end' },
+  adminButton: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#397974', paddingVertical: 9, paddingHorizontal: 14, borderRadius: 18 },
+  adminButtonText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
   hero: { backgroundColor: '#FFF', borderRadius: 24, overflow: 'hidden', borderWidth: 1, borderColor: palette.border },
   banner: { minHeight: 102, padding: 22, flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
   eyebrow: { color: '#D5E9E5', fontSize: 10, fontWeight: '700', letterSpacing: 2, paddingTop: 6 },
@@ -99,5 +117,3 @@ const styles = StyleSheet.create({
   notice: { padding: 16, borderRadius: 16, backgroundColor: '#E3EEEB', alignItems: 'flex-start' },
   logout: { minHeight: 50, alignItems: 'center', justifyContent: 'center', gap: 10, flexDirection: 'row', borderRadius: 16, borderWidth: 1, borderColor: '#E7D3D6', backgroundColor: '#FFF8F8' },
 });
-
-
