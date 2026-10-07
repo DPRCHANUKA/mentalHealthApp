@@ -1,11 +1,13 @@
-import { MOODS, type MoodId } from '@/constants/moods';
+import { MOODS, type Mood, type MoodId } from '@/constants/moods';
 import { Colors } from '@/constants/theme';
 import { saveCheckIn } from '@/lib/mood-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, type Href } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
+  Easing,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -17,6 +19,110 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+// How each emoji moves while idle (y/x in px, rot in degrees, d = ms per half-cycle)
+const IDLE_MOTION: Record<MoodId, { y: number; x: number; rot: number; d: number }> = {
+  great: { y: -6, x: 0, rot: 0, d: 650 },
+  good: { y: -3, x: 0, rot: 8, d: 1300 },
+  okay: { y: 0, x: 4, rot: 0, d: 1500 },
+  low: { y: 3, x: 0, rot: -6, d: 1800 },
+  'very-low': { y: 2, x: 2, rot: 0, d: 260 },
+};
+
+type MoodItemProps = {
+  mood: Mood;
+  index: number;
+  isSelected: boolean;
+  onPress: () => void;
+};
+
+function MoodItem({ mood, index, isSelected, onPress }: MoodItemProps) {
+  const idle = useRef(new Animated.Value(0)).current;
+  const pop = useRef(new Animated.Value(1)).current;
+  const wiggle = useRef(new Animated.Value(0)).current;
+
+  // Idle loop: each emoji keeps moving, slightly staggered
+  useEffect(() => {
+    const cfg = IDLE_MOTION[mood.id];
+    const loop = Animated.sequence([
+      Animated.delay(index * 150),
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(idle, {
+            toValue: 1,
+            duration: cfg.d,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: true,
+          }),
+          Animated.timing(idle, {
+            toValue: 0,
+            duration: cfg.d,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: true,
+          }),
+        ])
+      ),
+    ]);
+    loop.start();
+    return () => loop.stop();
+  }, [idle, index, mood.id]);
+
+  // Pop + wiggle when selected, settle back when not
+  useEffect(() => {
+    if (isSelected) {
+      Animated.parallel([
+        Animated.spring(pop, {
+          toValue: 1.2,
+          friction: 4,
+          tension: 140,
+          useNativeDriver: true,
+        }),
+        Animated.sequence([
+          Animated.timing(wiggle, { toValue: 1, duration: 80, useNativeDriver: true }),
+          Animated.timing(wiggle, { toValue: -1, duration: 120, useNativeDriver: true }),
+          Animated.timing(wiggle, { toValue: 1, duration: 120, useNativeDriver: true }),
+          Animated.timing(wiggle, { toValue: 0, duration: 80, useNativeDriver: true }),
+        ]),
+      ]).start();
+    } else {
+      Animated.spring(pop, {
+        toValue: 1,
+        friction: 5,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [isSelected, pop, wiggle]);
+
+  const cfg = IDLE_MOTION[mood.id];
+
+  const idleStyle = {
+    transform: [
+      { translateY: idle.interpolate({ inputRange: [0, 1], outputRange: [0, cfg.y] }) },
+      { translateX: idle.interpolate({ inputRange: [0, 1], outputRange: [0, cfg.x] }) },
+      { rotate: idle.interpolate({ inputRange: [0, 1], outputRange: ['0deg', `${cfg.rot}deg`] }) },
+    ],
+  };
+
+  const circleStyle = {
+    transform: [
+      { scale: pop },
+      { rotate: wiggle.interpolate({ inputRange: [-1, 1], outputRange: ['-14deg', '14deg'] }) },
+    ],
+  };
+
+  return (
+    <TouchableOpacity style={styles.moodItem} activeOpacity={0.8} onPress={onPress}>
+      <Animated.View
+        style={[styles.moodCircle, isSelected && styles.moodCircleSelected, circleStyle]}
+      >
+        <Animated.Text style={[styles.moodEmoji, idleStyle]}>{mood.emoji}</Animated.Text>
+      </Animated.View>
+      <Text style={[styles.moodLabel, isSelected && styles.moodLabelSelected]}>
+        {mood.label}
+      </Text>
+    </TouchableOpacity>
+  );
+}
 
 export default function CheckInScreen() {
   const router = useRouter();
@@ -82,29 +188,15 @@ export default function CheckInScreen() {
         <Text style={styles.question}>How are you feeling today?</Text>
 
         <View style={styles.moodRow}>
-          {MOODS.map((mood) => {
-            const isSelected = selected === mood.id;
-
-            return (
-              <TouchableOpacity
-                key={mood.id}
-                style={styles.moodItem}
-                activeOpacity={0.8}
-                onPress={() => setSelected(mood.id)}
-              >
-                <View
-                  style={[styles.moodCircle, isSelected && styles.moodCircleSelected]}
-                >
-                  <Text style={styles.moodEmoji}>{mood.emoji}</Text>
-                </View>
-                <Text
-                  style={[styles.moodLabel, isSelected && styles.moodLabelSelected]}
-                >
-                  {mood.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
+          {MOODS.map((mood, index) => (
+            <MoodItem
+              key={mood.id}
+              mood={mood}
+              index={index}
+              isSelected={selected === mood.id}
+              onPress={() => setSelected(mood.id)}
+            />
+          ))}
         </View>
 
         {/* Optional note */}
@@ -237,10 +329,10 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
 
+  // CHANGED: removed the static scale, the animation handles it now
   moodCircleSelected: {
     borderColor: Colors.light.accent,
     backgroundColor: Colors.light.accent + '26',
-    transform: [{ scale: 1.1 }],
   },
 
   moodEmoji: {
