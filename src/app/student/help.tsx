@@ -1,5 +1,5 @@
-import StudentPlaceholder from '@/components/student-placeholder';
+import { Redirect } from 'expo-router';
 
 export default function HelpScreen() {
-  return <StudentPlaceholder title="Help" showBack />;
+  return <Redirect href="/student/support-resources" />;
 }

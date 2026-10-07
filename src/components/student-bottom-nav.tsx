@@ -1,7 +1,7 @@
 import { Colors } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter, type Href } from 'expo-router';
+import { usePathname, useRouter, type Href } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -10,13 +10,19 @@ export type TabId = 'home' | 'check-in' | 'help' | 'profile';
 const TABS = [
   { id: 'home', label: 'Home', route: '/student/student-home', icon: 'home-outline', iconActive: 'home' },
   { id: 'check-in', label: 'Check-in', route: '/student/check-in', icon: 'shield-checkmark-outline', iconActive: 'shield-checkmark' },
-  { id: 'help', label: 'Help', route: '/student/help', icon: 'help-circle-outline', iconActive: 'help-circle' },
+  { id: 'help', label: 'Help', route: '/student/support-resources', icon: 'help-circle-outline', iconActive: 'help-circle' },
   { id: 'profile', label: 'Profile', route: '/student/profile', icon: 'person-outline', iconActive: 'person' },
 ] as const;
 
 export default function StudentBottomNav({ active }: { active?: TabId }) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const pathname = usePathname();
+  const currentTab: TabId | undefined =
+    ['/student/check-in', '/student/mood-result', '/student/mood-history'].includes(pathname) ? 'check-in' :
+    ['/student/help', '/student/support-resources', '/student/emergency-support', '/student/emergency', '/student/self-help', '/student/article', '/student/breathing', '/student/counselling'].includes(pathname) ? 'help' :
+    pathname === '/student/profile' ? 'profile' :
+    pathname === '/student/student-home' ? 'home' : active;
 
   return (
     <LinearGradient
@@ -24,15 +30,19 @@ export default function StudentBottomNav({ active }: { active?: TabId }) {
       style={[styles.bar, { paddingBottom: insets.bottom + 10 }]}
     >
       {TABS.map((tab) => {
-        const isActive = tab.id === active;
+        const isActive = tab.id === currentTab;
 
         return (
           <TouchableOpacity
             key={tab.id}
             style={styles.tab}
             activeOpacity={0.7}
+            accessibilityRole="tab"
+            accessibilityLabel={tab.label}
+            accessibilityState={{ selected: isActive }}
+            aria-selected={isActive}
             onPress={() => {
-              if (!isActive) router.replace(tab.route as Href);
+              if (pathname !== tab.route) router.replace(tab.route as Href);
             }}
           >
             <View style={[styles.iconWrap, isActive && styles.iconWrapActive]}>
@@ -87,3 +97,4 @@ const styles = StyleSheet.create({
   label: { fontSize: 12, fontWeight: '500', color: 'rgba(255,255,255,0.65)' },
   labelActive: { color: '#FFFFFF', fontWeight: '700' },
 });
+
