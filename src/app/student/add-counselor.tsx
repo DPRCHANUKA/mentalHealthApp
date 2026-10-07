@@ -16,6 +16,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { addCounselor } from '@/data/counselor-store';
+
 // Change this if you use a different currency
 const CURRENCY = 'Rs.';
 
@@ -89,18 +91,18 @@ export default function AddCounselorScreen() {
     return null;
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     const error = validate();
     if (error) {
       Alert.alert('Missing information', error);
       return;
     }
 
-    const counselor = {
+    const counselor = await addCounselor({
       photoUri,
       firstName: firstName.trim(),
       lastName: lastName.trim(),
-      gender,
+      gender: gender as Gender,
       age: Number(age),
       about: about.trim(),
       specialties,
@@ -108,14 +110,13 @@ export default function AddCounselorScreen() {
         format: key,
         fee: Number(fees[key]),
       })),
-    };
+    });
 
-    // TODO: save to your backend / database / shared state here
-    console.log('New counselor:', counselor);
-
-    Alert.alert('Counselor added', `${counselor.firstName} ${counselor.lastName} has been added.`, [
-      { text: 'OK', onPress: () => router.back() },
-    ]);
+    Alert.alert(
+      'Counselor added',
+      `${counselor.firstName} ${counselor.lastName} has been added.`,
+      [{ text: 'OK', onPress: () => router.replace('/student/counselor-page') }]
+    );
   };
 
   return (
@@ -293,7 +294,7 @@ export default function AddCounselorScreen() {
                     }
                     placeholder="0"
                     placeholderTextColor="#9CA3AF"
-                    keyboardType="decimal-pad" 
+                    keyboardType="decimal-pad"
                   />
                 </View>
               </View>

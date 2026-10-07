@@ -2,21 +2,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
+    Alert,
+    Image,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import StudentBottomNav from '@/components/student-bottom-nav';
 import {
-  type Counselor,
-  type SessionKey,
-  useCounselors,
+    type Counselor,
+    type SessionKey,
+    removeCounselor,
+    useCounselors,
 } from '@/data/counselor-store';
 
 // Change this if you use a different currency
@@ -47,7 +48,8 @@ const CHIP_COLORS: Record<string, { bg: string; text: string }> = {
 const GREEN = '#0D6A4D';
 const NAVY = '#1F2D45';
 
-export default function CheckInScreen() {
+export default function CounselorPageScreen() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const counselors = useCounselors();
 
@@ -67,16 +69,18 @@ export default function CheckInScreen() {
   return (
     <View style={styles.screen}>
       <ScrollView
-        style={styles.flex}
         contentContainerStyle={[
           styles.content,
-          // extra bottom space so the last card is not hidden behind the nav bar
-          { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 130 },
+          { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 40 },
         ]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
+        <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={26} color="#6B7280" />
+        </Pressable>
+
         <View style={styles.tagRow}>
           <Ionicons name="heart" size={16} color={GREEN} />
           <Text style={styles.tagText}>Empathetic, licensed care</Text>
@@ -106,9 +110,7 @@ export default function CheckInScreen() {
         {/* Specialty filter */}
         <View style={styles.sectionRow}>
           <Text style={styles.sectionLabel}>EXPLORE SPECIALTIES</Text>
-          <Text style={styles.sectionCount}>
-            {counselors.length} {counselors.length === 1 ? 'counselor' : 'counselors'}
-          </Text>
+          <Text style={styles.sectionCount}>{counselors.length} counselors</Text>
         </View>
         <ScrollView
           horizontal
@@ -140,17 +142,23 @@ export default function CheckInScreen() {
             </Text>
             <Text style={styles.emptyText}>
               {counselors.length === 0
-                ? 'Counselors will appear here once they are added.'
+                ? 'Add a counselor and they will appear here.'
                 : 'Try a different search or specialty.'}
             </Text>
+            {counselors.length === 0 && (
+              <Pressable
+                style={styles.emptyButton}
+                onPress={() => router.push('/student/add-counselor')}
+              >
+                <Ionicons name="person-add-outline" size={18} color="#FFFFFF" />
+                <Text style={styles.emptyButtonText}>Add Counselor</Text>
+              </Pressable>
+            )}
           </View>
         ) : (
           filtered.map((c) => <CounselorCard key={c.id} counselor={c} />)
         )}
       </ScrollView>
-
-      {/* Bottom navigation (Check-in tab highlighted) */}
-      <StudentBottomNav activeTab="check-in" />
     </View>
   );
 }
@@ -162,6 +170,13 @@ function CounselorCard({ counselor: c }: { counselor: Counselor }) {
   const fullName = `${c.firstName} ${c.lastName}`;
   const initials = `${c.firstName[0] ?? ''}${c.lastName[0] ?? ''}`.toUpperCase();
   const lowestFee = c.sessions.length ? Math.min(...c.sessions.map((s) => s.fee)) : 0;
+
+  const confirmRemove = () => {
+    Alert.alert('Remove counselor', `Remove ${fullName}?`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Remove', style: 'destructive', onPress: () => removeCounselor(c.id) },
+    ]);
+  };
 
   return (
     <View style={styles.card}>
@@ -182,6 +197,10 @@ function CounselorCard({ counselor: c }: { counselor: Counselor }) {
             {c.gender} · {c.age} years old
           </Text>
         </View>
+
+        <Pressable onPress={confirmRemove} hitSlop={10}>
+          <Ionicons name="trash-outline" size={20} color="#9CA3AF" />
+        </Pressable>
       </View>
 
       {/* Specialties */}
@@ -253,10 +272,10 @@ function CounselorCard({ counselor: c }: { counselor: Counselor }) {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
   screen: { flex: 1, backgroundColor: '#F7F6F2' },
   content: { paddingHorizontal: 20 },
 
+  backButton: { alignSelf: 'flex-start', marginBottom: 12 },
   tagRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   tagText: { color: GREEN, fontSize: 14, fontWeight: '500' },
   title: { fontSize: 30, fontWeight: '800', color: '#111827', marginTop: 6 },
@@ -370,4 +389,15 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', paddingVertical: 50, gap: 8 },
   emptyTitle: { fontSize: 18, fontWeight: '700', color: NAVY, marginTop: 6 },
   emptyText: { fontSize: 14, color: '#6B7280', textAlign: 'center' },
+  emptyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: GREEN,
+    borderRadius: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 22,
+    marginTop: 14,
+  },
+  emptyButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
 });
