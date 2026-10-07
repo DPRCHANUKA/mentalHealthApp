@@ -1,373 +1,52 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
-import {
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useState } from 'react';
+import { router } from 'expo-router';
+import { Pressable, Text, View } from 'react-native';
+import { Button, Screen, palette, ui } from '@/components/wellbeing/screen';
 
-import StudentBottomNav from '@/components/student-bottom-nav';
-import {
-  type Counselor,
-  type SessionKey,
-  useCounselors,
-} from '@/data/counselor-store';
-
-// Change this if you use a different currency
-const CURRENCY = 'Rs.';
-
-const ALL = 'All Practitioners';
-const FILTERS = [ALL, 'Anxiety Management', 'Self-Compassion', 'Overthinking', 'Stress'];
-
-const FORMAT_LABEL: Record<SessionKey, string> = {
-  video: '1 to 1 Video',
-  audio: 'Audio Call',
-  office: 'Live in Office',
-};
-
-const FORMAT_ICON: Record<SessionKey, keyof typeof Ionicons.glyphMap> = {
-  video: 'videocam-outline',
-  audio: 'call-outline',
-  office: 'business-outline',
-};
-
-const CHIP_COLORS: Record<string, { bg: string; text: string }> = {
-  'Anxiety Management': { bg: '#FDE3DC', text: '#9A3B2A' },
-  'Self-Compassion': { bg: '#D5F5E8', text: '#0B5A41' },
-  Overthinking: { bg: '#EDE4FB', text: '#5B3E96' },
-  Stress: { bg: '#E9E8E4', text: '#4B5563' },
-};
-
-const GREEN = '#0D6A4D';
-const NAVY = '#1F2D45';
+const moods = [
+  { value: 'happy', label: 'Happy', emoji: '😊' },
+  { value: 'okay', label: 'Okay', emoji: '🙂' },
+  { value: 'sad', label: 'Sad', emoji: '😔' },
+  { value: 'anxious', label: 'Anxious', emoji: '😟' },
+  { value: 'stressed', label: 'Stressed', emoji: '😣' },
+] as const;
+type Mood = typeof moods[number]['value'];
 
 export default function CheckInScreen() {
-  const insets = useSafeAreaInsets();
-  const counselors = useCounselors();
-
-  const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState(ALL);
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return counselors.filter((c) => {
-      const matchesFilter = filter === ALL || c.specialties.includes(filter);
-      const text =
-        `${c.firstName} ${c.lastName} ${c.about} ${c.specialties.join(' ')}`.toLowerCase();
-      return matchesFilter && (!q || text.includes(q));
-    });
-  }, [counselors, query, filter]);
+  const [mood, setMood] = useState<Mood | null>(null);
 
   return (
-    <View style={styles.screen}>
-      <ScrollView
-        style={styles.flex}
-        contentContainerStyle={[
-          styles.content,
-          // extra bottom space so the last card is not hidden behind the nav bar
-          { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 130 },
-        ]}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Header */}
-        <View style={styles.tagRow}>
-          <Ionicons name="heart" size={16} color={GREEN} />
-          <Text style={styles.tagText}>Empathetic, licensed care</Text>
-        </View>
-        <Text style={styles.title}>Find your supportive space</Text>
-        <Text style={styles.subtitle}>
-          Connect with trusted practitioners aligned with your personal journey and pace.
-        </Text>
-
-        {/* Search */}
-        <View style={styles.searchBox}>
-          <Ionicons name="search" size={20} color={GREEN} />
-          <TextInput
-            style={styles.searchInput}
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Search by concern or counselor"
-            placeholderTextColor="#6B7280"
-          />
-          {query.length > 0 && (
-            <Pressable onPress={() => setQuery('')} hitSlop={10}>
-              <Ionicons name="close-circle" size={20} color="#9CA3AF" />
-            </Pressable>
-          )}
-        </View>
-
-        {/* Specialty filter */}
-        <View style={styles.sectionRow}>
-          <Text style={styles.sectionLabel}>EXPLORE SPECIALTIES</Text>
-          <Text style={styles.sectionCount}>
-            {counselors.length} {counselors.length === 1 ? 'counselor' : 'counselors'}
-          </Text>
-        </View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterRow}
-        >
-          {FILTERS.map((item) => {
-            const selected = filter === item;
-            return (
-              <Pressable
-                key={item}
-                onPress={() => setFilter(item)}
-                style={[styles.filterChip, selected && styles.filterChipSelected]}
-              >
-                <Text style={[styles.filterText, selected && styles.filterTextSelected]}>
-                  {item}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-
-        {/* List */}
-        {filtered.length === 0 ? (
-          <View style={styles.empty}>
-            <Ionicons name="people-outline" size={44} color="#9CA3AF" />
-            <Text style={styles.emptyTitle}>
-              {counselors.length === 0 ? 'No counselors yet' : 'No matches found'}
-            </Text>
-            <Text style={styles.emptyText}>
-              {counselors.length === 0
-                ? 'Counselors will appear here once they are added.'
-                : 'Try a different search or specialty.'}
-            </Text>
-          </View>
-        ) : (
-          filtered.map((c) => <CounselorCard key={c.id} counselor={c} />)
-        )}
-      </ScrollView>
-
-      {/* Bottom navigation (Check-in tab highlighted) */}
-      <StudentBottomNav activeTab="check-in" />
-    </View>
+    <Screen title="Daily Check-in" subtitle="Take a moment for yourself.">
+      <Text accessibilityRole="header" style={[ui.heading, { textAlign: 'center', marginVertical: 16 }]}>
+        How are you feeling today?
+      </Text>
+      <Text style={[ui.body, { textAlign: 'center' }]}>Choose the mood that feels closest to you.</Text>
+      <View style={{ gap: 12, marginVertical: 12 }}>
+        {moods.map((item) => (
+          <Pressable
+            key={item.value}
+            accessibilityRole="radio"
+            accessibilityLabel={item.label}
+            accessibilityState={{ checked: mood === item.value }}
+            aria-checked={mood === item.value}
+            onPress={() => setMood(item.value)}
+            style={({ pressed }) => [
+              ui.card, ui.row,
+              { minHeight: 64, borderWidth: 2, borderColor: mood === item.value ? palette.teal : palette.border,
+                backgroundColor: mood === item.value ? '#DDEEEB' : '#FFF', opacity: pressed ? 0.7 : 1 },
+            ]}
+          >
+            <Text style={{ fontSize: 28 }} accessible={false}>{item.emoji}</Text>
+            <Text style={[ui.title, { flex: 1 }]}>{item.label}</Text>
+            {mood === item.value && <Text style={{ color: palette.teal, fontSize: 22 }}>✓</Text>}
+          </Pressable>
+        ))}
+      </View>
+      <Button label="Continue" disabled={!mood} onPress={() => {
+        if (mood) router.push({ pathname: '/student/mood-result', params: { mood } });
+      }} />
+      <Text style={[ui.small, { textAlign: 'center' }]}>Your selection opens a mood preview. Check-ins are not saved yet.</Text>
+    </Screen>
   );
 }
 
-function CounselorCard({ counselor: c }: { counselor: Counselor }) {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-
-  const fullName = `${c.firstName} ${c.lastName}`;
-  const initials = `${c.firstName[0] ?? ''}${c.lastName[0] ?? ''}`.toUpperCase();
-  const lowestFee = c.sessions.length ? Math.min(...c.sessions.map((s) => s.fee)) : 0;
-
-  return (
-    <View style={styles.card}>
-      <View style={styles.cardTop}>
-        {c.photoUri ? (
-          <Image source={{ uri: c.photoUri }} style={styles.avatar} />
-        ) : (
-          <View style={[styles.avatar, styles.avatarFallback]}>
-            <Text style={styles.initials}>{initials}</Text>
-          </View>
-        )}
-
-        <View style={styles.info}>
-          <Text style={styles.name} numberOfLines={2}>
-            {fullName}
-          </Text>
-          <Text style={styles.meta}>
-            {c.gender} · {c.age} years old
-          </Text>
-        </View>
-      </View>
-
-      {/* Specialties */}
-      <View style={styles.chipRow}>
-        {c.specialties.map((s) => {
-          const color = CHIP_COLORS[s] ?? CHIP_COLORS.Stress;
-          return (
-            <View key={s} style={[styles.chip, { backgroundColor: color.bg }]}>
-              <Text style={[styles.chipText, { color: color.text }]}>{s}</Text>
-            </View>
-          );
-        })}
-      </View>
-
-      {/* Formats + price */}
-      <View style={styles.priceRow}>
-        <View style={styles.formatIcons}>
-          {c.sessions.map((s) => (
-            <Ionicons key={s.format} name={FORMAT_ICON[s.format]} size={18} color={GREEN} />
-          ))}
-        </View>
-        <Text style={styles.price}>
-          {c.sessions.length > 1 ? 'From ' : ''}
-          {CURRENCY} {lowestFee}
-          <Text style={styles.perSession}> /session</Text>
-        </Text>
-      </View>
-
-      {/* Expanded profile */}
-      {open && (
-        <View style={styles.details}>
-          <Text style={styles.detailsHeading}>About</Text>
-          <Text style={styles.detailsText}>{c.about}</Text>
-
-          <Text style={[styles.detailsHeading, { marginTop: 14 }]}>Sessions & fees</Text>
-          {c.sessions.map((s) => (
-            <View key={s.format} style={styles.feeLine}>
-              <View style={styles.feeLineLeft}>
-                <Ionicons name={FORMAT_ICON[s.format]} size={16} color={GREEN} />
-                <Text style={styles.detailsText}>{FORMAT_LABEL[s.format]}</Text>
-              </View>
-              <Text style={styles.feeValue}>
-                {CURRENCY} {s.fee}
-              </Text>
-            </View>
-          ))}
-        </View>
-      )}
-
-      {/* Buttons */}
-      <View style={styles.buttonRow}>
-        <Pressable
-          onPress={() => setOpen((v) => !v)}
-          style={({ pressed }) => [styles.profileButton, pressed && styles.pressed]}
-        >
-          <Text style={styles.profileButtonText}>{open ? 'Hide Profile' : 'View Profile'}</Text>
-        </Pressable>
-
-        <Pressable
-          onPress={() => router.push('/student/appointments')}
-          style={({ pressed }) => [styles.bookButton, pressed && styles.pressed]}
-        >
-          <Text style={styles.bookButtonText}>Book</Text>
-          <Ionicons name="chevron-forward" size={16} color="#FFFFFF" />
-        </Pressable>
-      </View>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  screen: { flex: 1, backgroundColor: '#F7F6F2' },
-  content: { paddingHorizontal: 20 },
-
-  tagRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  tagText: { color: GREEN, fontSize: 14, fontWeight: '500' },
-  title: { fontSize: 30, fontWeight: '800', color: '#111827', marginTop: 6 },
-  subtitle: { fontSize: 15, color: '#4B5563', marginTop: 6, lineHeight: 21 },
-
-  searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 28,
-    paddingHorizontal: 18,
-    paddingVertical: 4,
-    marginTop: 18,
-  },
-  searchInput: { flex: 1, fontSize: 16, color: NAVY, paddingVertical: 12 },
-
-  sectionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 24,
-    marginBottom: 12,
-  },
-  sectionLabel: { fontSize: 12, fontWeight: '700', color: '#374151', letterSpacing: 0.5 },
-  sectionCount: { fontSize: 12, fontWeight: '600', color: GREEN },
-
-  filterRow: { gap: 10, paddingRight: 20 },
-  filterChip: {
-    backgroundColor: '#FDE3DC',
-    borderRadius: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-  },
-  filterChipSelected: { backgroundColor: GREEN },
-  filterText: { fontSize: 15, fontWeight: '600', color: '#9A3B2A' },
-  filterTextSelected: { color: '#FFFFFF' },
-
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 28,
-    padding: 18,
-    marginTop: 18,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
-  },
-  cardTop: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  avatar: { width: 66, height: 66, borderRadius: 16 },
-  avatarFallback: { backgroundColor: '#D5F5E8', alignItems: 'center', justifyContent: 'center' },
-  initials: { fontSize: 22, fontWeight: '700', color: GREEN },
-  info: { flex: 1 },
-  name: { fontSize: 19, fontWeight: '700', color: '#111827' },
-  meta: { fontSize: 13, color: '#6B7280', marginTop: 3 },
-
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
-  chip: { borderRadius: 14, paddingVertical: 6, paddingHorizontal: 12 },
-  chipText: { fontSize: 13, fontWeight: '500' },
-
-  priceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#F2F1EC',
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    marginTop: 14,
-  },
-  formatIcons: { flexDirection: 'row', gap: 12 },
-  price: { fontSize: 17, fontWeight: '800', color: '#111827' },
-  perSession: { fontSize: 12, fontWeight: '400', color: '#6B7280' },
-
-  details: { marginTop: 14 },
-  detailsHeading: { fontSize: 14, fontWeight: '700', color: NAVY, marginBottom: 6 },
-  detailsText: { fontSize: 14, color: '#4B5563', lineHeight: 20 },
-  feeLine: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 5,
-  },
-  feeLineLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  feeValue: { fontSize: 14, fontWeight: '700', color: NAVY },
-
-  buttonRow: { flexDirection: 'row', gap: 12, marginTop: 16 },
-  profileButton: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#E9DEFB',
-    borderRadius: 28,
-    paddingVertical: 15,
-  },
-  profileButtonText: { fontSize: 16, fontWeight: '500', color: '#4B3A78' },
-  bookButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    backgroundColor: GREEN,
-    borderRadius: 28,
-    paddingVertical: 15,
-  },
-  bookButtonText: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
-  pressed: { opacity: 0.85 },
-
-  empty: { alignItems: 'center', paddingVertical: 50, gap: 8 },
-  emptyTitle: { fontSize: 18, fontWeight: '700', color: NAVY, marginTop: 6 },
-  emptyText: { fontSize: 14, color: '#6B7280', textAlign: 'center' },
-});

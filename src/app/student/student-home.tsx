@@ -1,3 +1,4 @@
+import { useStudentProfile } from '@/state/student-profile';
 import StudentBottomNav from '@/components/student-bottom-nav';
 import { Colors } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons'; // ← new
@@ -24,7 +25,7 @@ function getGreeting() {
 export default function StudentHomeScreen() {
   const router = useRouter(); // ← new
   const insets = useSafeAreaInsets();
-  const userName = 'Alex'; // TODO: replace with real user data later
+  const { name: userName } = useStudentProfile();
 
   return (
     <View style={styles.container}>
@@ -45,7 +46,7 @@ export default function StudentHomeScreen() {
             {getGreeting()}, {userName}
           </Text>
 
-          <View style={styles.avatarShadow}>
+          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open student profile" onPress={() => router.push('/student/profile')} style={styles.avatarShadow}>
             <LinearGradient
               colors={['#8F88C9', '#4FA7A0']}
               start={{ x: 0, y: 0 }}
@@ -55,7 +56,7 @@ export default function StudentHomeScreen() {
               <View style={styles.avatarGloss} />
               <Text style={styles.avatarIcon}>👤</Text>
             </LinearGradient>
-          </View>
+          </TouchableOpacity>
         </View>
 
         <Text style={styles.subtitle}>
