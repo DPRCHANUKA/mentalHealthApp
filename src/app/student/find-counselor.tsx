@@ -2,21 +2,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, type Href } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
-    Image,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import StudentBottomNav from '@/components/student-bottom-nav';
 import {
-    useCounselors,
-    type Counselor,
-    type SessionKey,
+  useCounselors,
+  type Counselor,
+  type SessionKey,
 } from '@/data/counselor-store';
 
 // Change this if you use a different currency
@@ -147,9 +146,6 @@ export default function FindCounselorScreen() {
           filtered.map((c) => <CounselorCard key={c.id} counselor={c} />)
         )}
       </ScrollView>
-
-      {/* Bottom navigation */}
-      <StudentBottomNav />
     </View>
   );
 }

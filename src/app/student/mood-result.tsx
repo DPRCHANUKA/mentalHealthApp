@@ -1,4 +1,4 @@
-import StudentBottomNav from '@/components/student-bottom-nav';
+
 import { getMood } from '@/constants/moods';
 import { Colors } from '@/constants/theme';
 import { getLatestCheckIn } from '@/lib/mood-storage';
@@ -303,8 +303,6 @@ export default function MoodResultScreen() {
           })}
         </View>
       </View>
-
-      <StudentBottomNav />
     </View>
   );
 }
