@@ -6,11 +6,17 @@ import { useColorScheme } from 'react-native';
 import { IrishGrover_400Regular } from '@expo-google-fonts/irish-grover';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import { loadStudentProfile } from '@/state/student-profile';
+import { useEffect } from 'react';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+
+  useEffect(() => {
+    loadStudentProfile();
+  }, []);
 
   const [fontsLoaded] = useFonts({
     IrishGrover: IrishGrover_400Regular,
