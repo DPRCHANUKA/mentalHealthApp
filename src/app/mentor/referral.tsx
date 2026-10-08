@@ -1,3 +1,4 @@
+import { mentorStyles as s } from '@/components/mentor/styles';
 import { router, useLocalSearchParams } from 'expo-router';
 import { MentorScreen } from '@/components/mentor/screen';
 import { addReferral } from '@/state/mentor-session';
@@ -25,25 +26,28 @@ export default function MentorReferralScreen() {
     router.replace({ pathname: '/mentor/referral-sent', params: { id } });
   }
   return <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-    <MentorScreen title="New Referral" back navigation={false} contentStyle={{ justifyContent: 'space-between', minHeight: 650, paddingTop: 60 }}>
-      <View style={{ gap: 20 }}>
+    <MentorScreen title="New Referral" back navigation={false} subtitle="Help a student take the next step." contentStyle={{ gap: 20, paddingTop: 8 }}>
+      <View style={s.notice}><Text style={s.eyebrow}>REFERRAL DETAILS</Text><Text style={ui.body}>To: {person?.name ?? 'Unassigned counsellor'}</Text><Text style={ui.small}>Only include information needed to arrange support.</Text></View>
+      <View style={s.panel}>
         <Text style={ui.title}>Student name</Text>
-        <View style={[ui.search, { borderRadius: 10 }]}><Asset source={assets.directoryFrame} width={24} /><TextInput accessibilityLabel="Student name" placeholder="Enter the student name" placeholderTextColor={palette.muted} value={student} onChangeText={value => { setStudent(value); setError(''); }} maxLength={100} autoCapitalize="words" style={[ui.searchInput, { fontFamily: 'IrishGrover', fontSize: 16 }]} /></View>
+        <View style={[ui.search, { borderRadius: 10 }]}><Asset source={assets.directoryFrame} width={24} /><TextInput accessibilityLabel="Student name" placeholder="Enter the student name" placeholderTextColor={palette.muted} value={student} onChangeText={value => { setStudent(value); setError(''); }} maxLength={100} autoCapitalize="words" style={[ui.searchInput, { fontSize: 16 }]} /></View>
         {!!error && <Text accessibilityRole="alert" style={ui.error}>{error}</Text>}
       </View>
-      <View style={{ gap: 18, marginTop: 40 }}>
+      <View style={s.panel}>
         <Text style={ui.title}>Reason (optional)</Text>
-        <TextInput accessibilityLabel="Referral reason, optional" multiline maxLength={1000} value={reason} onChangeText={setReason} placeholder="Type here..." placeholderTextColor={palette.muted} style={[ui.input, { minHeight: 132, textAlignVertical: 'top', fontFamily: 'IrishGrover' }]} />
-        <Text style={ui.title}>Priority</Text><Chips values={priorities} value={priority} onChange={setPriority} />
+        <TextInput accessibilityLabel="Referral reason, optional" multiline maxLength={1000} value={reason} onChangeText={setReason} placeholder="Briefly describe the support needed..." placeholderTextColor={palette.muted} style={[ui.input, { minHeight: 132, textAlignVertical: 'top' }]} />
+        <Text style={[ui.small, { textAlign: 'right' }]}>{reason.length}/1000</Text><Text style={ui.title}>Priority</Text><Chips values={priorities} value={priority} onChange={setPriority} />
         <Text style={ui.title}>Service</Text><Chips values={services} value={service} onChange={setService} />
       </View>
-      <View style={{ gap: 12, marginTop: 28 }}>
-        <Button label="Send Referral" onPress={submit} style={{ borderRadius: 20, minHeight: 56, marginHorizontal: 20 }} />
+      <View style={{ gap: 12, marginTop: 0 }}>
+        <Button label="Send Referral" onPress={submit} style={{ borderRadius: 20, minHeight: 56, marginHorizontal: 0 }} />
         <Text style={[ui.small, { textAlign: 'center' }]}>Demo only. Details stay in this session and are not delivered to a counsellor.</Text>
       </View>
 
     </MentorScreen>
   </KeyboardAvoidingView>;
 }
+
+
 
 

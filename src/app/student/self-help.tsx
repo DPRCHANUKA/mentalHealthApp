@@ -19,12 +19,13 @@ export default function SelfHelpScreen() {
     <Chips values={filters} value={filter} onChange={setFilter} />
     {items.map(item => <Pressable key={item.title} accessibilityRole="button" onPress={item.open} style={({ pressed }) => [ui.card, ui.row, { minHeight: 70, padding: 10, opacity: pressed ? 0.7 : 1 }]}>
       <View style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: palette.pink, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: palette.border }}><Asset source={item.icon} width={18} /></View>
-      <View style={ui.grow}><Text style={[ui.title, { fontSize: 15.5 }]}>{item.title}</Text><Text style={[ui.small, { fontSize: 11, marginTop: 5 }]}>{item.meta}</Text></View>
+      <View style={ui.grow}><Text style={[ui.title, { fontSize: 16 }]}>{item.title}</Text><Text style={[ui.small, { fontSize: 12, marginTop: 5 }]}>{item.meta}</Text></View>
       <Asset source={assets.libraryContainer2} width={17} height={14.5} />
     </Pressable>)}
     {!items.length && <Text style={ui.body}>No resources match your search. Try another word or category.</Text>}
   </Screen>;
 }
+
 
 
 

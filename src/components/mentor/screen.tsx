@@ -23,10 +23,11 @@ export function MentorScreen({ navigation = true, ...props }: ComponentProps<typ
           onPress={() => { if (path !== tab.route) router.replace(tab.route as Href); }}
           style={{ flex: 1, minHeight: 56, alignItems: 'center', gap: 7 }}>
           <Ionicons name={tab.icon} size={30} color={selected ? '#8ED7D0' : '#FFF'} />
-          <Text style={{ fontFamily: 'IrishGrover', fontSize: 12, color: '#FFF' }}>{tab.label}</Text>
+          <Text style={{ fontSize: 12, color: '#FFF' }}>{tab.label}</Text>
         </Pressable>;
       })}
     </View>}
   </View>;
 }
+
 
