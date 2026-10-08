@@ -1,6 +1,6 @@
-import { useStudentProfile } from '@/state/student-profile';
 import StudentBottomNav from '@/components/student-bottom-nav';
 import { Colors } from '@/constants/theme';
+import { useStudentProfile } from '@/state/student-profile';
 import { Ionicons } from '@expo/vector-icons'; // ← new
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, type Href } from 'expo-router'; // ← new
@@ -42,9 +42,9 @@ export default function StudentHomeScreen() {
       <View style={[styles.content, { paddingTop: insets.top + 40 }]}>
         {/* Greeting + profile */}
         <View style={styles.greetingRow}>
-          <Text style={styles.greeting}>
-            {getGreeting()}, {userName}
-          </Text>
+         <Text style={styles.greeting}>
+          {getGreeting()}{userName ? `, ${userName}` : ''}
+         </Text>
 
           <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open student profile" onPress={() => router.push('/student/profile')} style={styles.avatarShadow}>
             <LinearGradient
