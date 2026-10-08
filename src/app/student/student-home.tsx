@@ -1,4 +1,4 @@
-import StudentBottomNav from '@/components/student-bottom-nav';
+
 import { Colors } from '@/constants/theme';
 import { useStudentProfile } from '@/state/student-profile';
 import { Ionicons } from '@expo/vector-icons'; // ← new
@@ -140,9 +140,6 @@ export default function StudentHomeScreen() {
           </LinearGradient>
         </TouchableOpacity>
       </View>
-
-      {/* Bottom navigation */}
-      <StudentBottomNav active="home" />
     </View>
   );
 }

@@ -1,12 +1,11 @@
-import { router, type Href } from 'expo-router';
+import { Colors } from '@/constants/theme';
+import { wellbeingAssets as assets } from '@/constants/wellbeing-assets';
 import { Image, type ImageSource } from 'expo-image';
+import { router, type Href } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { type PropsWithChildren, type ReactNode } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import StudentBottomNav from '@/components/student-bottom-nav';
-import { Colors } from '@/constants/theme';
-import { wellbeingAssets as assets } from '@/constants/wellbeing-assets';
 
 export const palette = { ...Colors.light, ink: '#202A44', muted: '#66747C', teal: '#4F9D98', pink: '#F4E5E7', lavender: '#E8E7F3', border: '#D5DFE1', danger: '#A94C57' };
 
@@ -35,7 +34,6 @@ export function Screen({ title, subtitle, children, back = false, footer = true,
     <ScrollView style={{ flex: 1, backgroundColor: background }} contentContainerStyle={[ui.content, contentStyle, !footer && { paddingBottom: insets.bottom + 24 }]} keyboardShouldPersistTaps="handled">
       {children}
     </ScrollView>
-    {footer && <StudentBottomNav />}
   </View>;
 }
 
