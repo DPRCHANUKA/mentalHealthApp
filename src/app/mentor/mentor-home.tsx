@@ -1,33 +1,41 @@
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Pressable, Text, View } from 'react-native';
 import { MentorScreen } from '@/components/mentor/screen';
+import { mentorStyles as s } from '@/components/mentor/styles';
 import { palette, ui } from '@/components/wellbeing/screen';
 import { useMentorSession } from '@/state/mentor-session';
 
 export default function MentorHomeScreen() {
   const { profile, referrals } = useMentorSession();
   const cards = [
-    { label: 'Refer a Student', icon: '👤', route: '/mentor/referral' as const },
-    { label: 'Counselling Directory', icon: '🔍', route: '/mentor/directory' as const },
-    { label: 'View My Referrals', icon: '📋', route: '/mentor/referrals' as const },
-  ];
-  return <MentorScreen contentStyle={{ paddingTop: 38, gap: 28 }}>
-    <View style={ui.row}><Text style={{ fontSize: 46 }}>☀️</Text><View style={ui.grow}>
-      <Text style={[ui.title, { fontSize: 23 }]}>Hello, {profile.name}</Text>
-      <Text style={[ui.title, { marginTop: 14 }]}>Together we support{ '\n'}student well-being</Text>
-    </View></View>
+    { label: 'Refer a student', detail: 'Prepare a supportive next step.', icon: 'person-add-outline', route: '/mentor/referral' },
+    { label: 'Counselling directory', detail: 'Explore the available support team.', icon: 'people-outline', route: '/mentor/directory' },
+    { label: 'My referrals', detail: 'Review referrals from this session.', icon: 'documents-outline', route: '/mentor/referrals' },
+  ] as const;
+  return <MentorScreen title="Mentor Home" subtitle="Small actions. Meaningful support." contentStyle={{ gap: 20 }}>
+    <View style={s.banner}>
+      <Text style={[s.eyebrow, { color: '#9DD8D0' }]}>YOUR MENTOR SPACE</Text>
+      <Text style={[ui.heading, { color: '#FFF', fontSize: 28 }]}>Hello, {profile.name}</Text>
+      <Text style={[ui.body, { color: '#D4E2E7' }]}>Together, we can make it easier for students to reach out.</Text>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/mentor/profile')} style={{ alignSelf: 'flex-start', paddingVertical: 12 }}>
+        <Text style={{ color: '#B8EAE2', fontWeight: '600' }}>View your profile →</Text>
+      </Pressable>
+    </View>
     <View style={ui.row}>{[
-      { label: 'Students', icon: '🎓', value: new Set(referrals.map(item => item.student.toLowerCase())).size },
-      { label: 'Referrals', icon: '🏢', value: referrals.length },
-      { label: 'Today', icon: '🗓️', value: referrals.filter(item => new Date(item.createdAt).toDateString() === new Date().toDateString()).length },
-    ].map((item, i) => <Pressable key={item.label} accessibilityRole="button" onPress={() => router.push('/mentor/referrals')} style={[ui.card, { flex: 1, padding: 10, alignItems: 'center', backgroundColor: i === 1 ? palette.lavender : palette.pink }]}>
-      <Text style={{ fontSize: 30 }}>{item.icon}</Text><Text style={ui.title}>{item.label}</Text><Text style={ui.small}>{item.value}</Text>
+      { label: 'Students', value: new Set(referrals.map(item => item.student.toLowerCase())).size },
+      { label: 'Referrals', value: referrals.length },
+      { label: 'Today', value: referrals.filter(item => new Date(item.createdAt).toDateString() === new Date().toDateString()).length },
+    ].map(item => <Pressable key={item.label} accessibilityRole="button" onPress={() => router.push('/mentor/referrals')} style={[s.panel, { flex: 1, padding: 12, gap: 6, alignItems: 'center' }]}>
+      <Text style={[ui.heading, { fontSize: 28 }]}>{item.value}</Text><Text style={ui.small}>{item.label}</Text>
     </Pressable>)}</View>
-    <Text style={[ui.heading, { marginTop: 20 }]}>Quick Actions</Text>
-    {cards.map((card, i) => <Pressable key={card.label} accessibilityRole="button" onPress={() => router.push(card.route)} style={[ui.card, ui.row, { minHeight: 80, borderRadius: 22, backgroundColor: i === 1 ? palette.lavender : palette.pink }]}>
-      <Text style={{ fontSize: 34 }}>{card.icon}</Text><Text style={[ui.title, { fontSize: 23, flex: 1, textAlign: 'center' }]}>{card.label}</Text>
+    <Text style={[ui.title, { fontSize: 20 }]}>How can we help today?</Text>
+    {cards.map(card => <Pressable key={card.label} accessibilityRole="button" onPress={() => router.push(card.route)}
+      style={({ pressed }) => [s.panel, ui.row, { opacity: pressed ? 0.7 : 1 }]}>
+      <View style={s.icon}><Ionicons name={card.icon} size={24} color={palette.teal} /></View>
+      <View style={ui.grow}><Text style={ui.title}>{card.label}</Text><Text style={[ui.small, { marginTop: 5 }]}>{card.detail}</Text></View>
+      <Ionicons name="chevron-forward" size={18} color={palette.muted} />
     </Pressable>)}
-    <Text style={ui.small}>Demo workspace. Profile and referral details stay in memory until the app reloads.</Text>
+    <View style={s.notice}><Text style={ui.small}>Demo workspace · Counts reflect this session only. Referrals are not delivered to a counsellor.</Text></View>
   </MentorScreen>;
 }
-

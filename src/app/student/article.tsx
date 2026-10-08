@@ -46,8 +46,8 @@ export default function ArticleScreen() {
           <Asset source={assets.articleContainer} width={12} height={8} /><Text style={{ fontSize: 11 }}>{article.readTime}</Text>
         </View>
       </Pressable>
-      <View><Text style={[ui.title, { fontSize: 20 }]}>{article.title}</Text>{!!article.author && <Text style={[ui.small, { marginTop: 5 }]}>By Author - {article.author}</Text>}</View>
-      {article.paragraphs.map((paragraph, index) => <Text selectable key={index} style={[ui.body, { fontSize: largeText ? 19 : 14, lineHeight: largeText ? 29 : 21 }]}>{paragraph}</Text>)}
+      <View><Text style={[ui.title, { fontSize: 24, fontWeight: '700' }]}>{article.title}</Text>{!!article.author && <Text style={[ui.small, { marginTop: 5 }]}>By Author - {article.author}</Text>}</View>
+      {article.paragraphs.map((paragraph, index) => <Text selectable key={index} style={[ui.body, { fontSize: largeText ? 20 : 16, lineHeight: largeText ? 32 : 26 }]}>{paragraph}</Text>)}
             {article.id !== 'sleep' && <Button label="Try the guided breathing exercise" onPress={() => router.push('/student/breathing')} />}
       {article.id !== 'calming' && <>
         <Button label="Explore support resources" tone="secondary" onPress={() => router.push('/student/support-resources')} />
@@ -83,6 +83,7 @@ export default function ArticleScreen() {
     </Dialog>
   </Screen>;
 }
+
 
 
 
