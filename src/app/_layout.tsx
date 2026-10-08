@@ -33,7 +33,7 @@ export default function TabLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="role-selection" />
         <Stack.Screen name="student" />
-        <Stack.Screen name="mentor/mentor-home" />
+        <Stack.Screen name="mentor" />
       </Stack>
     </ThemeProvider>
   );
