@@ -3,10 +3,10 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme } from 'react-native';
 
-import { IrishGrover_400Regular } from '@expo-google-fonts/irish-grover';
-
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import { loadMentorProfile } from '@/state/mentor-session';
 import { loadStudentProfile } from '@/state/student-profile';
+import { IrishGrover_400Regular } from '@expo-google-fonts/irish-grover';
 import { useEffect } from 'react';
 
 SplashScreen.preventAutoHideAsync();
@@ -16,6 +16,7 @@ export default function TabLayout() {
 
   useEffect(() => {
     loadStudentProfile();
+    loadMentorProfile();
   }, []);
 
   const [fontsLoaded] = useFonts({

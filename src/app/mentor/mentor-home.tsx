@@ -1,10 +1,10 @@
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Pressable, Text, View } from 'react-native';
 import { MentorScreen } from '@/components/mentor/screen';
 import { mentorStyles as s } from '@/components/mentor/styles';
 import { palette, ui } from '@/components/wellbeing/screen';
 import { useMentorSession } from '@/state/mentor-session';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { Pressable, Text, View } from 'react-native';
 
 export default function MentorHomeScreen() {
   const { profile, referrals } = useMentorSession();
@@ -16,7 +16,7 @@ export default function MentorHomeScreen() {
   return <MentorScreen title="Mentor Home" subtitle="Small actions. Meaningful support." contentStyle={{ gap: 20 }}>
     <View style={s.banner}>
       <Text style={[s.eyebrow, { color: '#9DD8D0' }]}>YOUR MENTOR SPACE</Text>
-      <Text style={[ui.heading, { color: '#FFF', fontSize: 28 }]}>Hello, {profile.name}</Text>
+     <Text style={[ui.heading, { color: '#FFF', fontSize: 28 }]}>Hello{profile.name ? `, ${profile.name}` : ''}</Text>
       <Text style={[ui.body, { color: '#D4E2E7' }]}>Together, we can make it easier for students to reach out.</Text>
       <Pressable accessibilityRole="button" onPress={() => router.push('/mentor/profile')} style={{ alignSelf: 'flex-start', paddingVertical: 12 }}>
         <Text style={{ color: '#B8EAE2', fontWeight: '600' }}>View your profile →</Text>
