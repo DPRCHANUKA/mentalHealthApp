@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
   title: {
     marginTop: 14,
     fontSize: 26,
-    fontFamily: 'IrishGrover',
+   fontWeight: '800',
     color: Colors.light.success,
   },
 

@@ -211,10 +211,10 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
 
-  // Only the title uses IrishGrover
+  // Only the title 
   title: {
     fontSize: 32,
-    fontFamily: 'IrishGrover',
+    fontWeight: '800',
     color: Colors.light.primary,
   },
 

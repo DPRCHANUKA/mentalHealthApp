@@ -1,4 +1,4 @@
-import StudentBottomNav, { type TabId } from '@/components/student-bottom-nav';
+import { type TabId } from '@/components/student-bottom-nav';
 import { Colors } from '@/constants/theme';
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -7,10 +7,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 type Props = {
   title: string;
   showBack?: boolean; // true for feature pages, false for tab pages
-  activeTab?: TabId;  // highlights a tab in the bottom bar
+  activeTab?: TabId;  // kept so existing screens still compile; the layout now handles the bar
 };
 
-export default function StudentPlaceholder({ title, showBack = false, activeTab }: Props) {
+export default function StudentPlaceholder({ title, showBack = false }: Props) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -30,8 +30,6 @@ export default function StudentPlaceholder({ title, showBack = false, activeTab 
           <Text style={styles.soon}>🚧 Coming soon</Text>
         </View>
       </View>
-
-      <StudentBottomNav active={activeTab} />
     </View>
   );
 }
@@ -41,7 +39,7 @@ const styles = StyleSheet.create({
   content: { flex: 1, paddingHorizontal: 24 },
   header: { flexDirection: 'row', alignItems: 'center' },
   backArrow: { fontSize: 32, color: Colors.light.textSecondary, marginRight: 16 },
-  title: { fontSize: 28, fontFamily: 'IrishGrover', color: Colors.light.primary },
+  title: { fontSize: 28, fontWeight: '800', color: Colors.light.primary },
   body: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   soon: { fontSize: 18, color: Colors.light.textSecondary },
 });
