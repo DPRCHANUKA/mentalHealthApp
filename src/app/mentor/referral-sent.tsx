@@ -116,6 +116,7 @@ export default function ReferralSentScreen() {
 
       <Animated.View style={[s.panel, { opacity: content }]}>
         <Text style={s.eyebrow}>REFERRAL SUMMARY</Text>
+        <Text style={ui.title}>From: {referral.mentorName || 'Mentor'}</Text>
         <Text style={ui.title}>To: {referral.recipient}</Text>
         <Text style={ui.title}>Service: {referral.service}</Text>
         <Text style={ui.title}>Priority: {referral.priority}</Text>

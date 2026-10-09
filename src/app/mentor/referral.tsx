@@ -1,8 +1,9 @@
+import { promptCompleteProfile } from '@/components/mentor/profile-guard';
 import { MentorScreen } from '@/components/mentor/screen';
 import { mentorStyles as s } from '@/components/mentor/styles';
 import { Button, palette, ui } from '@/components/wellbeing/screen';
 import { counsellors } from '@/constants/wellbeing-content';
-import { addReferral } from '@/state/mentor-session';
+import { addReferral, isMentorProfileComplete, useMentorSession } from '@/state/mentor-session';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
@@ -80,6 +81,7 @@ function OptionGroup<T extends string>({ values, value, onChange, icons }: {
 }
 
 export default function MentorReferralScreen() {
+  const { profile } = useMentorSession();
   const { recipient } = useLocalSearchParams<{ recipient?: string }>();
   const [recipientId, setRecipientId] = useState<string | undefined>(
     counsellors.find(item => item.id === recipient)?.id
@@ -100,6 +102,12 @@ export default function MentorReferralScreen() {
   }
 
   function submit() {
+    // Profile must be complete before a referral can be sent
+    if (!isMentorProfileComplete(profile)) {
+      promptCompleteProfile();
+      return;
+    }
+
     let ok = true;
     if (!person) { setRecipientError('Choose a counsellor or psychologist before sending.'); ok = false; }
     if (!student.trim()) { setError('Enter the student name before preparing a referral.'); ok = false; }
