@@ -1,8 +1,10 @@
 import { auth, db, ensureUser } from '@/lib/firebase';
+import { isProfileValid, normalizeProfile, validateProfile } from '@/lib/profile-validation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useSyncExternalStore } from 'react';
+import { Alert } from 'react-native';
 
 export type Profile = { name: string; id: string; sex: string };
 
@@ -28,8 +30,9 @@ export function useProfileLoaded() {
   return useSyncExternalStore(subscribe, () => loaded, () => loaded);
 }
 
+// Student rules: 2 letters + 8 digits (IT23728462), name like KARUNARATHNE D.P.G
 export function isProfileComplete(p: Profile) {
-  return p.name.trim() !== '' && p.id.trim() !== '' && p.sex.trim() !== '';
+  return isProfileValid(p, 'student');
 }
 
 // Call once when the app starts
@@ -57,7 +60,15 @@ export async function loadStudentProfile() {
   }
 }
 
-export async function saveStudentProfile(value: Profile) {
+export async function saveStudentProfile(input: Profile) {
+  // Validate FIRST. If anything is wrong, show the problems and save nothing.
+  const errors = validateProfile(input, 'student');
+  if (Object.keys(errors).length > 0) {
+    Alert.alert('Check your details', Object.values(errors).join('\n\n'));
+    return;
+  }
+
+  const value = normalizeProfile(input);
   profile = value;
   emit();
   await AsyncStorage.setItem(KEY, JSON.stringify(value));
