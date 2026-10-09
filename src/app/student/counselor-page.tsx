@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, type Href } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
-  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -14,7 +13,6 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  removeCounselor,
   useCounselors,
   type Counselor,
   type SessionKey,
@@ -171,13 +169,6 @@ function CounselorCard({ counselor: c }: { counselor: Counselor }) {
   const initials = `${c.firstName[0] ?? ''}${c.lastName[0] ?? ''}`.toUpperCase();
   const lowestFee = c.sessions.length ? Math.min(...c.sessions.map((s) => s.fee)) : 0;
 
-  const confirmRemove = () => {
-    Alert.alert('Remove counselor', `Remove ${fullName}?`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Remove', style: 'destructive', onPress: () => removeCounselor(c.id) },
-    ]);
-  };
-
   return (
     <View style={styles.card}>
       <View style={styles.cardTop}>
@@ -197,10 +188,6 @@ function CounselorCard({ counselor: c }: { counselor: Counselor }) {
             {c.gender} · {c.age} years old
           </Text>
         </View>
-
-        <Pressable onPress={confirmRemove} hitSlop={10}>
-          <Ionicons name="trash-outline" size={20} color="#9CA3AF" />
-        </Pressable>
       </View>
 
       {/* Specialties */}
