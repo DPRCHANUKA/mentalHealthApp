@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 28,
-    fontFamily: 'IrishGrover',
+    fontWeight: '800',
     color: Colors.light.primary,
   },
 
