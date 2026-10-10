@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Image, StyleSheet, Text, View } from 'react-native';
 
 const BG = '#0B3037';
-const LOGO = require('../../assets/images/mental-health-logo.png');
+const LOGO = require('../../assets/images/mental-health-app-logo.png');
 const SOUND = require('../../assets/sounds/splash.mp3'); // <- your sound track
 
 /* ---------- SPLASH LENGTH ----------

@@ -6,7 +6,7 @@ export const wellbeingAssets = {
   libraryContainer3: require('../../assets/images/wellbeing/library-Container3.svg'),
   libraryContainer4: require('../../assets/images/wellbeing/library-Container4.svg'),
   libraryContainer5: require('../../assets/images/wellbeing/library-Container5.svg'),
-  articleTranquilSteamingHerbalTeaRiverStonesAndFreshEucalyptusLeafInWarmMorningSunlight: require('../../assets/images/wellbeing/article-TranquilSteamingHerbalTeaRiverStonesAndFreshEucalyptusLeafInWarmMorningSunlight.png'),
+articleTranquilSteamingHerbalTeaRiverStonesAndFreshEucalyptusLeafInWarmMorningSunlight: require('../../assets/images/wellbeing/article-tea-fixed.png'),
   articleButtonGoBackSvgWireframeBackArrow: require('../../assets/images/wellbeing/article-ButtonGoBackSvgWireframeBackArrow.svg'),
   articleContainer: require('../../assets/images/wellbeing/article-Container.svg'),
   articleSvg: require('../../assets/images/wellbeing/article-Svg.svg'),
