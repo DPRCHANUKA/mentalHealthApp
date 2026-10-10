@@ -9,7 +9,7 @@ export default function StartScreen() {
     <View style={styles.container}>
       <View style={styles.content}>
         <Image
-          source={require('../../assets/images/mental-health-logo.png')}
+          source={require('../../assets/images/mental-health-app-logo.png')}
           style={styles.logo}
           resizeMode="contain"
         />
