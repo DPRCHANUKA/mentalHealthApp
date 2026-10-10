@@ -1,26 +1,26 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import {
-    getAuth,
-    initializeAuth,
-    signInAnonymously,
-    type Auth,
+  getAuth,
+  initializeAuth,
+  signInAnonymously,
+  type Auth,
 } from 'firebase/auth';
 // @ts-ignore: exists at runtime in React Native, but missing from the type definitions
 import { getReactNativePersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
+// Uses .env when it exists (local development).
+// Falls back to the project values so the APK build works without .env.
+// A Firebase web key is not a secret: your Firestore rules protect the data.
 const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY ?? 'AIzaSyB2Q-ThotZY9KCTMzGoQP0i07on8lxh9SY',
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN ?? 'luma-164fb.firebaseapp.com',
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID ?? 'luma-164fb',
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET ?? 'luma-164fb.firebasestorage.app',
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? '154843890898',
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID ?? '1:154843890898:web:0f6a40b654e51d4035990b',
 };
-
-// Temporary check: remove after it works
-console.log('Firebase key loaded?', !!firebaseConfig.apiKey, firebaseConfig.projectId);
 
 const isNewApp = getApps().length === 0;
 const app = isNewApp ? initializeApp(firebaseConfig) : getApp();
