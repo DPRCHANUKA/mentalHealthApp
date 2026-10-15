@@ -1,11 +1,21 @@
-import { getMood, type Mood } from '@/constants/moods';
+import { getMood, MOODS, type Mood, type MoodId } from '@/constants/moods'; // ← new (MOODS, MoodId)
 import { Colors } from '@/constants/theme';
-import { getCheckIns, type CheckIn } from '@/lib/mood-storage';
+import {
+  canEditCheckIn, // ← new
+  editTimeLeftMs, // ← new
+  getCheckIns,
+  updateCheckInMood, // ← new
+  type CheckIn,
+} from '@/lib/mood-storage';
+import { Ionicons } from '@expo/vector-icons'; // ← new
 import { useFocusEffect, useRouter, type Href } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import {
+  Alert, // ← new
   Animated,
   Easing,
+  Modal, // ← new
+  Pressable, // ← new
   ScrollView,
   StyleSheet,
   Text,
@@ -48,6 +58,14 @@ function formatTime(iso: string) {
     hour: 'numeric',
     minute: '2-digit',
   });
+}
+
+// e.g. "5h 20m left" / "42m left" ← new
+function formatTimeLeft(ms: number) {
+  const totalMinutes = Math.max(1, Math.floor(ms / 60000));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return hours > 0 ? `${hours}h ${minutes}m left` : `${minutes}m left`;
 }
 
 // Bar that grows from 0 to its height every time `replayKey` changes
@@ -247,6 +265,11 @@ export default function MoodHistoryScreen() {
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [animKey, setAnimKey] = useState(0);
 
+  // Change-mood sheet ← new
+  const [editing, setEditing] = useState<CheckIn | null>(null);
+  const [pickedMood, setPickedMood] = useState<MoodId | null>(null);
+  const [saving, setSaving] = useState(false);
+
   // Reload every time the screen is opened, and replay the bar animation
   useFocusEffect(
     useCallback(() => {
@@ -306,6 +329,43 @@ export default function MoodHistoryScreen() {
     if (router.canGoBack()) router.back();
     else router.replace('/student/student-home');
   };
+
+  // ← new: open / save / close the change-mood sheet
+  const openEdit = (entry: CheckIn) => {
+    setEditing(entry);
+    setPickedMood(entry.mood);
+  };
+
+  const closeEdit = () => {
+    if (saving) return;
+    setEditing(null);
+    setPickedMood(null);
+  };
+
+  const handleSave = async () => {
+    if (!editing || !pickedMood || saving) return;
+
+    setSaving(true);
+    const ok = await updateCheckInMood(editing.id, pickedMood);
+    setSaving(false);
+
+    if (!ok) {
+      Alert.alert(
+        'Too late to change',
+        'A mood can only be changed within 24 hours of checking in.'
+      );
+    }
+
+    // Refresh the list and replay the chart animation
+    const list = await getCheckIns();
+    setCheckIns(list);
+    setAnimKey((k) => k + 1);
+    setEditing(null);
+    setPickedMood(null);
+  };
+
+  const now = Date.now();
+  const unchanged = !editing || pickedMood === editing.mood;
 
   return (
     <View style={styles.container}>
@@ -404,24 +464,105 @@ export default function MoodHistoryScreen() {
                 const mood = getMood(entry.mood);
                 if (!mood) return null;
 
+                const editable = canEditCheckIn(entry, now); // ← new
+
                 return (
-                  <View
+                  <TouchableOpacity
                     key={entry.id}
+                    activeOpacity={editable ? 0.7 : 1}
+                    disabled={!editable}
+                    onPress={() => openEdit(entry)}
                     style={[styles.row, index === recent.length - 1 && styles.rowLast]}
                   >
                     <Text style={styles.rowDay}>{relativeDay(entry.createdAt)}</Text>
                     <Text style={styles.rowEmoji}>{mood.emoji}</Text>
                     <Text style={[styles.rowLabel, { color: mood.color }]}>
                       {mood.label}
+                      {entry.editedAt ? <Text style={styles.edited}> · edited</Text> : null}
                     </Text>
                     <Text style={styles.rowTime}>{formatTime(entry.createdAt)}</Text>
-                  </View>
+
+                    {/* ← new: pencil if changeable, lock if not */}
+                    {editable ? (
+                      <View style={styles.editChip}>
+                        <Ionicons name="pencil" size={14} color="#FFFFFF" />
+                      </View>
+                    ) : (
+                      <View style={styles.lockChip}>
+                        <Ionicons
+                          name="lock-closed"
+                          size={13}
+                          color={Colors.light.textSecondary}
+                        />
+                      </View>
+                    )}
+                  </TouchableOpacity>
                 );
               })}
             </View>
+
+            <Text style={styles.footnote}>
+              You can change a mood within 24 hours of checking in.
+            </Text>
           </>
         )}
       </ScrollView>
+
+      {/* ← new: change-mood sheet */}
+      <Modal
+        visible={editing !== null}
+        transparent
+        animationType="slide"
+        onRequestClose={closeEdit}
+      >
+        <Pressable style={styles.backdrop} onPress={closeEdit} />
+
+        <View style={[styles.sheet, { paddingBottom: insets.bottom + 20 }]}>
+          <View style={styles.grabber} />
+
+          <Text style={styles.sheetTitle}>Change your mood</Text>
+          {editing && (
+            <Text style={styles.sheetSub}>
+              {formatTimeLeft(editTimeLeftMs(editing))} to change this check-in
+            </Text>
+          )}
+
+          <View style={styles.pickRow}>
+            {MOODS.map((mood) => {
+              const isPicked = pickedMood === mood.id;
+
+              return (
+                <TouchableOpacity
+                  key={mood.id}
+                  style={styles.pickItem}
+                  activeOpacity={0.8}
+                  onPress={() => setPickedMood(mood.id)}
+                >
+                  <View style={[styles.pickCircle, isPicked && styles.pickCircleSelected]}>
+                    <Text style={styles.pickEmoji}>{mood.emoji}</Text>
+                  </View>
+                  <Text style={[styles.pickLabel, isPicked && styles.pickLabelSelected]}>
+                    {mood.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          <TouchableOpacity
+            activeOpacity={0.9}
+            disabled={unchanged || saving}
+            onPress={handleSave}
+            style={[styles.saveButton, (unchanged || saving) && styles.saveDisabled]}
+          >
+            <Text style={styles.saveText}>{saving ? 'Saving...' : 'Save change'}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={closeEdit} style={styles.cancelButton} hitSlop={8}>
+            <Text style={styles.cancelText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -642,9 +783,153 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
+  edited: {
+    fontSize: 11,
+    fontWeight: '400',
+    color: Colors.light.textSecondary,
+  },
+
   rowTime: {
     marginLeft: 8,
     fontSize: 13,
+    color: Colors.light.textSecondary,
+  },
+
+  // ← new
+  editChip: {
+    marginLeft: 10,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.light.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  lockChip: {
+    marginLeft: 10,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.light.backgroundSelected,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  footnote: {
+    marginTop: 10,
+    textAlign: 'center',
+    fontSize: 12,
+    color: Colors.light.textSecondary,
+  },
+
+  /* Change-mood sheet */
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(20,30,40,0.45)',
+  },
+
+  sheet: {
+    paddingTop: 12,
+    paddingHorizontal: 24,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    backgroundColor: '#FFFFFF',
+  },
+
+  grabber: {
+    alignSelf: 'center',
+    width: 44,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: Colors.light.backgroundSelected,
+  },
+
+  sheetTitle: {
+    marginTop: 18,
+    fontSize: 20,
+    fontWeight: '800',
+    color: Colors.light.primary,
+    textAlign: 'center',
+  },
+
+  sheetSub: {
+    marginTop: 4,
+    fontSize: 13,
+    color: Colors.light.textSecondary,
+    textAlign: 'center',
+  },
+
+  pickRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 24,
+  },
+
+  pickItem: {
+    alignItems: 'center',
+    width: 60,
+  },
+
+  pickCircle: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.light.background,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+
+  pickCircleSelected: {
+    borderColor: Colors.light.accent,
+    backgroundColor: Colors.light.accent + '26',
+    transform: [{ scale: 1.1 }],
+  },
+
+  pickEmoji: {
+    fontSize: 28,
+  },
+
+  pickLabel: {
+    marginTop: 8,
+    fontSize: 11,
+    color: Colors.light.textSecondary,
+  },
+
+  pickLabelSelected: {
+    fontWeight: '700',
+    color: Colors.light.primary,
+  },
+
+  saveButton: {
+    marginTop: 28,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: Colors.light.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  saveDisabled: {
+    opacity: 0.4,
+  },
+
+  saveText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+
+  cancelButton: {
+    marginTop: 14,
+    alignItems: 'center',
+  },
+
+  cancelText: {
+    fontSize: 15,
+    fontWeight: '600',
     color: Colors.light.textSecondary,
   },
 

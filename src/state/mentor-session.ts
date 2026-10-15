@@ -1,8 +1,8 @@
 import { auth, db, ensureUser } from '@/lib/firebase';
 import { isProfileValid, normalizeProfile, validateProfile } from '@/lib/profile-validation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { signOut } from 'firebase/auth';
-import { collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
+import { deleteUser, signOut } from 'firebase/auth';
+import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
 import { useSyncExternalStore } from 'react';
 import { Alert } from 'react-native';
 
@@ -136,9 +136,41 @@ export function addReferral(details: Omit<Referral, 'id' | 'createdAt' | 'mentor
   return referral.id;
 }
 
+// Log out: clears this phone only, the data stays on the server
 export async function clearMentorSession() {
   state = { profile: EMPTY, referrals: [] };
   publish();
   await AsyncStorage.multiRemove([PROFILE_KEY, REFERRALS_KEY]);
   try { await signOut(auth); } catch {}
+}
+
+// Delete: removes the profile and this mentor's referrals from the server AND this phone.
+// Returns true only if the server delete worked.
+export async function deleteMentorProfile(): Promise<boolean> {
+  try {
+    const user = await ensureUser();
+
+    // 1) Delete this mentor's referrals
+    const refs = await getDocs(query(collection(db, 'referrals'), where('mentorUid', '==', user.uid)));
+    await Promise.all(refs.docs.map(item => deleteDoc(item.ref)));
+
+    // 2) Delete the mentor profile
+    await deleteDoc(doc(db, 'mentors', user.uid));
+
+    // 3) Remove the anonymous account; if that is refused, just sign out
+    try {
+      await deleteUser(user);
+    } catch {
+      try { await signOut(auth); } catch {}
+    }
+  } catch (e) {
+    console.warn('Could not delete mentor profile', e);
+    return false; // keep local data so the mentor can try again
+  }
+
+  // 4) Clear this phone
+  state = { profile: EMPTY, referrals: [] };
+  publish();
+  await AsyncStorage.multiRemove([PROFILE_KEY, REFERRALS_KEY]);
+  return true;
 }
