@@ -1,8 +1,9 @@
 import { auth, db, ensureUser } from '@/lib/firebase';
+import { clearCheckIns } from '@/lib/mood-storage';
 import { isProfileValid, normalizeProfile, validateProfile } from '@/lib/profile-validation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { signOut } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { deleteUser, signOut } from 'firebase/auth';
+import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
 import { useSyncExternalStore } from 'react';
 import { Alert } from 'react-native';
 
@@ -80,9 +81,38 @@ export async function saveStudentProfile(input: Profile) {
   }
 }
 
+// Log out: clears this phone only, the data stays on the server
 export async function clearStudentProfile() {
   profile = EMPTY;
   emit();
   await AsyncStorage.removeItem(KEY);
   try { await signOut(auth); } catch {}
+}
+
+// Delete: removes the profile from the server AND this phone.
+// Returns true only if the server delete worked.
+export async function deleteStudentProfile(): Promise<boolean> {
+  try {
+    const user = await ensureUser();
+
+    // 1) Delete the server data first (needs the signed-in user)
+    await deleteDoc(doc(db, 'students', user.uid));
+
+    // 2) Remove the anonymous account; if that is refused, just sign out
+    try {
+      await deleteUser(user);
+    } catch {
+      try { await signOut(auth); } catch {}
+    }
+  } catch (e) {
+    console.warn('Could not delete student profile', e);
+    return false; // keep local data so the student can try again
+  }
+
+  // 3) Clear this phone
+  profile = EMPTY;
+  emit();
+  await AsyncStorage.removeItem(KEY);
+  await clearCheckIns();
+  return true;
 }

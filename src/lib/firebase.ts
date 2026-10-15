@@ -9,6 +9,7 @@ import {
 // @ts-ignore: exists at runtime in React Native, but missing from the type definitions
 import { getReactNativePersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { Platform } from 'react-native'; // ← new
 
 // Uses .env when it exists (local development).
 // Falls back to the project values so the APK build works without .env.
@@ -26,12 +27,14 @@ const isNewApp = getApps().length === 0;
 const app = isNewApp ? initializeApp(firebaseConfig) : getApp();
 
 let authInstance: Auth;
-if (isNewApp) {
+if (isNewApp && Platform.OS !== 'web') { // ← changed
+  // Phone (iOS / Android): keep the login between app launches
   authInstance = initializeAuth(app, {
     persistence: getReactNativePersistence(AsyncStorage),
   });
 } else {
-  authInstance = getAuth(app); // fast refresh: already initialised
+  // Web, or fast refresh: Firebase's default setup is fine
+  authInstance = getAuth(app);
 }
 
 export const auth = authInstance;
