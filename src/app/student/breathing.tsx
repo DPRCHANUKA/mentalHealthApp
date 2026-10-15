@@ -1,18 +1,69 @@
-import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
-import { Asset, Button, Chips, Dialog, Screen, ui, palette } from '@/components/wellbeing/screen';
+import { Asset, Button, Chips, Dialog, palette, Screen, ui } from '@/components/wellbeing/screen';
 import { wellbeingAssets as assets } from '@/constants/wellbeing-assets';
 import { useBreathingSession } from '@/hooks/use-breathing-session';
+import * as Speech from 'expo-speech';
+import { useEffect, useRef, useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
 
 const phases = ['BREATHE IN', 'HOLD', 'BREATHE OUT', 'HOLD'];
+const spoken = ['Breathe in', 'Hold', 'Breathe out', 'Hold'];
 const durations = ['1 minute', '3 minutes', '5 minutes'] as const;
+const voiceOptions = ['Voice on', 'Voice off'] as const;
+const speechOptions = { language: 'en-US', rate: 0.85, pitch: 1.0 };
+
 export default function BreathingScreen() {
   const [duration, setDuration] = useState<(typeof durations)[number]>('5 minutes');
+  const [voice, setVoice] = useState<(typeof voiceOptions)[number]>('Voice on');
   const [settings, setSettings] = useState(false);
   const [finished, setFinished] = useState(false);
   const seconds = parseInt(duration, 10) * 60;
   const session = useBreathingSession(seconds);
   const time = Math.floor(session.elapsed);
+  const lastPhase = useRef(-1);
+  const closing = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Voice guidance: phase name when a phase starts, then the countdown number
+  useEffect(() => {
+    if (voice === 'Voice off') {
+      Speech.stop();
+      return;
+    }
+    if (session.complete) {
+      Speech.stop();
+      Speech.speak('Session complete. Well done.', speechOptions);
+      lastPhase.current = -1;
+      return;
+    }
+    if (!session.running) {
+      Speech.stop();
+      lastPhase.current = -1;
+      return;
+    }
+    Speech.stop();
+    if (session.phase !== lastPhase.current) {
+      lastPhase.current = session.phase;
+      Speech.speak(spoken[session.phase], speechOptions);
+    } else {
+      Speech.speak(String(session.remaining), speechOptions);
+    }
+  }, [session.running, session.complete, session.phase, session.remaining, voice]);
+
+  // Stop talking and clear timers when leaving the screen
+  useEffect(() => () => {
+    Speech.stop();
+    if (closing.current) clearTimeout(closing.current);
+  }, []);
+
+  function completeSession() {
+    session.pause();
+    setFinished(true);
+    if (voice === 'Voice on') {
+      // small delay so the pause effect's Speech.stop() doesn't cut it off
+      if (closing.current) clearTimeout(closing.current);
+      closing.current = setTimeout(() => Speech.speak('Session complete. Well done.', speechOptions), 300);
+    }
+  }
+
   return <Screen title="Breathing Exercise" subtitle="Box breathing technique" back background={palette.lavender}
     action={<Pressable accessibilityRole="button" accessibilityLabel="Breathing settings" style={ui.iconButton} onPress={() => { session.pause(); setSettings(true); }}><Asset source={assets.breathingButtonSettingsSvg} /></Pressable>}
     contentStyle={{ justifyContent: 'space-between', paddingTop: 24, minHeight: 600 }}>
@@ -38,16 +89,16 @@ export default function BreathingScreen() {
         <Pressable accessibilityRole="button" accessibilityLabel="Pause breathing" accessibilityState={{ disabled: !session.running }} disabled={!session.running} onPress={session.pause} style={[ui.button, ui.primary, { minWidth: 58 }]}><Asset source={assets.breathingSvg} width={16} /></Pressable>
         <Button label="Reset" tone="secondary" onPress={() => { session.reset(); setFinished(false); }} />
       </View>
-      <Button label="Complete Session" onPress={() => { session.pause(); setFinished(true); }} style={{ borderRadius: 12 }} />
+      <Button label="Complete Session" onPress={completeSession} style={{ borderRadius: 12 }} />
     </View>
     <Dialog title="Breathing settings" visible={settings} onClose={() => setSettings(false)}>
       <Text style={ui.body}>Choose a session length. Each phase lasts four seconds. Changing the length resets the timer.</Text>
       <Chips values={durations} value={duration} onChange={value => { session.reset(); setDuration(value); }} />
+      <Text style={ui.body}>Spoken guidance says each phase and counts down the seconds.</Text>
+      <Chips values={voiceOptions} value={voice} onChange={setVoice} />
     </Dialog>
     <Dialog title="Session finished" visible={finished} onClose={() => setFinished(false)}>
       <Text style={ui.body}>You took {time} seconds to pause and breathe. This session is not saved to your profile.</Text>
     </Dialog>
   </Screen>;
 }
-
-
