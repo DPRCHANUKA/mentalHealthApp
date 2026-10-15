@@ -1,13 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, type Href } from 'expo-router';
 import {
-    Alert,
-    Image,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -26,6 +26,10 @@ export default function AdminHomeScreen() {
       { text: 'Cancel', style: 'cancel' },
       { text: 'Remove', style: 'destructive', onPress: () => removeCounselor(id) },
     ]);
+  };
+
+  const handleEdit = (id: string) => {
+    router.push(`/student/edit-counselor?id=${encodeURIComponent(id)}` as Href);
   };
 
   const handleLogout = () => {
@@ -105,9 +109,24 @@ export default function AdminHomeScreen() {
                     {c.specialties.join(', ')}
                   </Text>
                 </View>
-                <Pressable onPress={() => confirmRemove(c.id, name)} hitSlop={10}>
-                  <Ionicons name="trash-outline" size={22} color="#B42318" />
-                </Pressable>
+
+                {/* Actions */}
+                <View style={styles.actions}>
+                  <Pressable
+                    onPress={() => handleEdit(c.id)}
+                    hitSlop={10}
+                    style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
+                  >
+                    <Ionicons name="create-outline" size={20} color={TEAL} />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => confirmRemove(c.id, name)}
+                    hitSlop={10}
+                    style={({ pressed }) => [styles.deleteButton, pressed && styles.pressed]}
+                  >
+                    <Ionicons name="trash-outline" size={20} color="#B42318" />
+                  </Pressable>
+                </View>
               </View>
             );
           })
@@ -188,6 +207,24 @@ const styles = StyleSheet.create({
   initials: { fontSize: 17, fontWeight: '700', color: '#0D6A4D' },
   name: { fontSize: 16, fontWeight: '700', color: NAVY },
   meta: { fontSize: 13, color: '#6B7280', marginTop: 2 },
+
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  editButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#E4F3F1',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#FFF1F0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
   empty: { alignItems: 'center', gap: 8, paddingVertical: 36 },
   emptyText: { color: '#6B7280', fontSize: 14, textAlign: 'center' },
